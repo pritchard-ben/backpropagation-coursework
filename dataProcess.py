@@ -1,14 +1,17 @@
-file = open("dataset.txt", "r")
-dataSet = [] # initialise empty list
-# print(file.readline())
-for x in file: # for each line in the file
-    x = x[0:len(x)-1]
-    lineList = x.split("\t")
-    #The following lines will convert the strings to floats, however while data not clean this is impossible
-    # for y in range(0, len(lineList)-1):
-    #     lineList[y] = float(lineList[y])
-    dataSet.append(lineList)
+def getData(): 
+    file = open("dataset.txt", "r")
+    dataSet = [] # initialise empty list
+    # print(file.readline())
+    for x in file: # for each line in the file
+        x = x[0:len(x)-1]
+        lineList = x.split("\t")
+        #The following lines will convert the strings to floats, however while data not clean this is impossible
+        # for y in range(0, len(lineList)-1):
+        #     lineList[y] = float(lineList[y])
+        dataSet.append(lineList)
+    return dataSet
     
+# dataSet = getData()
 # print(dataSet)
 # print ("\n")
 def convertFloat(dataSet):
@@ -21,10 +24,10 @@ def convertFloat(dataSet):
                 
             except ValueError: # if not possible, record index and update count
                 errorCount += 1
-                print(i, j, dataSet[i])
+                # print(i, j, dataSet[i])
                 errorLocation.append(i)
     # display number of missing data
-    print("Error count: " + str(errorCount))
+    # print("Error count: " + str(errorCount))
     # reverse sort to avoid index errors
     errorLocation.sort(reverse=True)
     # remove rows with missing data
@@ -34,7 +37,7 @@ def convertFloat(dataSet):
     return dataSet
 
 
-dataSet = convertFloat(dataSet)#cleanse data
+# dataSet = convertFloat(dataSet)#cleanse data
 
 def standardiseData(dataSet):
     minList = [] # initialise empty list
@@ -54,18 +57,21 @@ def standardiseData(dataSet):
     for i in range(0, len(dataSet)):
         for j in range(0, len(dataSet[0])):
             dataSet[i][j] = 0.8*((dataSet[i][j] - minList[j]) / (maxList[j] - minList[j])) + 0.1
-    return dataSet, minList[5], maxList[5]
+    return dataSet, minList[len(minList)-1], maxList[len(maxList)-1]
 
-dataSet, minOut, maxOut = standardiseData(dataSet)
+# dataSet, minOut, maxOut = standardiseData(dataSet)
 #minOut and maxOut are used to destandardise the output of the neural network
-print(dataSet)
+# print(dataSet)
     
 
-trainingSet = [[]] # initialise empty list
-validationSet = [[]] # initialise empty list
-testSet = [[]] # initialise empty list
+# trainingSet = [[]] # initialise empty list
+# validationSet = [[]] # initialise empty list
+# testSet = [[]] # initialise empty list
 
 def splitData(dataSet):
+    trainingSet = [[]] # initialise empty list
+    validationSet = [[]] # initialise empty list
+    testSet = [[]] # initialise empty list
     for i in range(0, len(dataSet)):
         if i % 5 == 0:
             testSet.append(dataSet[i])
@@ -78,5 +84,12 @@ def splitData(dataSet):
     testSet.pop(0)
     return trainingSet, validationSet, testSet
 
-trainingSet, validationSet, testSet = splitData(dataSet)
-print (len(trainingSet), len(validationSet), len(testSet))
+def getAllData():
+    data = getData()
+    data = convertFloat(data)
+    data, minOut, maxOut = standardiseData(data)
+    trainingSet, validationSet, testSet = splitData(data)
+    return trainingSet, validationSet, testSet, minOut, maxOut
+    
+# trainingSet, validationSet, testSet , minOut, maxOut = getAllData()
+# print (len(trainingSet), len(validationSet), len(testSet))
