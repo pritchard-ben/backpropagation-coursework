@@ -72,7 +72,7 @@ for x in range(1):# test with one training example
 # Backpropagation
 # Calculate the delta values for the output layer
     deltaOut = (trainingData[x][4] - outActivation) * sigmoidDerivative(outActivation) # calculate delta for output layer
-    for y in range(len(weights)):
+    for y in range(len(weights)): # iterate through the hidden layer again
         
 
 # Calculate the delta values for the hidden layer
