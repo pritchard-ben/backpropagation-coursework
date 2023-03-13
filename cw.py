@@ -54,6 +54,7 @@ def trainModel(useData, weights, outWeights, biases, outBias, learningRate):
     # Iterate through the training data
     # for x in range(len(useData)):# for each training example
     for x in range(len(useData)):# test with one training example
+        outSum = 0 # initialise weighted sum for output layer as 0
         for y in range(len(weights)):# for each neuron in the hidden layer
             weightedSum = 0 # initialise weighted sum as 0
             for z in range(len(useData[x])-1): # for each input
@@ -61,9 +62,7 @@ def trainModel(useData, weights, outWeights, biases, outBias, learningRate):
             weightedSum += biases[y] # add bias to weighted sum
             weightedSums[y] = weightedSum # store weighted sum in list
             activations[y] = sigmoid(weightedSum) # calculate activation, store in list
-        outSum = 0 # initialise weighted sum for output layer as 0
-        for y in range(len(outWeights)): # for each weight from hidden layer to output layer
-            outSum += outWeights[y] * activations[y] # calculate weighted sum, add to weighted sum
+            outSum += outWeights[y] * activations[y] + outBias # calculate weighted sum, add to weighted sum
         outActivation = sigmoid(outSum) # calculate activation for output layer
         
         #testing
@@ -72,17 +71,23 @@ def trainModel(useData, weights, outWeights, biases, outBias, learningRate):
     # Backpropagation
     # Calculate the delta values for the output layer
         hiddenDelta = []
+        
+        pastWeightChange = [] # initialise list to store past weight changes to add momentum
+        for i in range(len(weights)):
+            pastWeightChange.append(0)
         deltaOut = (useData[x][4] - outActivation) * sigmoidDerivative(outActivation) # calculate delta for output layer
     # Calculate the delta values for the hidden layer
         for y in range(len(weights)): # iterate through the hidden layer again
             hiddenDelta.append(deltaOut * outWeights[y] * sigmoidDerivative(activations[y])) # calculate delta for hidden layer    
     # Update the weights and biases
-        for y in range(len(weights)): # iterate through the weights again
             outWeights[y] = outWeights[y] + learningRate * deltaOut * activations[y] # update the weights from hidden layer to output layer
             outBias = outBias + learningRate * deltaOut # update the bias for the output layer
             biases[y] = biases[y] + learningRate * hiddenDelta[y] # update the biases for the hidden layer
+            weightChange = []
             for z in range(len(weights[y])): # iterate through the weights again
-                weights[y][z] = (weights[y][z] + learningRate * hiddenDelta[y] * useData[x][z]) # update the weights from input layer to hidden layer
+                weightChange.append(learningRate * hiddenDelta[y] * useData[x][z])
+                weights[y][z] = (weights[y][z] + weightChange[z] + 0.9 * pastWeightChange[z]) # update the weights from input layer to hidden layer, pastWeightChange is added to add momentum
+            pastWeightChange = weightChange# update pastWeightChange to be used in next iteration
     return weights, outWeights, biases, outBias
     
 def useModel(weights, outWeights, biases, outBias, useData, minOut, maxOut):
@@ -105,16 +110,25 @@ def useModel(weights, outWeights, biases, outBias, useData, minOut, maxOut):
         outSum = 0 # initialise weighted sum for output layer as 0
         
         for y in range(len(outWeights)): # for each weight from hidden layer to output layer
-            outSum += outWeights[y] * activations[y] # calculate weighted sum, add to weighted sum
+            outSum += outWeights[y] * activations[y] + outBias # calculate weighted sum, add to weighted sum
         outActivation = sigmoid(outSum) # calculate activation for output layer
         errorSum = outActivation - useData[x][len(useData[x])-1]
         
     averageError = errorSum / len(useData)
     print(averageError)
+    return averageError
                 
 if __name__ == "__main__":
-    trainingData, validationData, testData, minOut, maxOut = dataProcess.getAllData()
-    weights, outWeights, biases, outBias = initWB(5, 8, 1)
-    for x in range(2000): # set the number of epochs to train for
-        weights, outWeights, biases, outBias = trainModel(trainingData, weights, outWeights, biases, outBias, 0.1)
-    useModel(weights, outWeights, biases, outBias, testData, minOut, maxOut)
+    bestError = 1
+    for x in range(50):
+        trainingData, validationData, testData, minOut, maxOut = dataProcess.getAllData()
+        weights, outWeights, biases, outBias = initWB(5, 10, 1) # first parameter is number of inputs, second is number of hidden neurons, third is number of outputs
+        for x in range(300): # set the number of epochs to train for
+            weights, outWeights, biases, outBias = trainModel(trainingData, weights, outWeights, biases, outBias, 0.1)
+            # weights, outWeights, biases, outBias = trainModel(validationData, weights, outWeights, biases, outBias, 0.1)
+        averageError = useModel(weights, outWeights, biases, outBias, testData, minOut, maxOut)
+        if averageError < bestError:
+            bestError, bestWeights, bestOutWeights, bestBiases, bestOutBias = averageError, weights, outWeights, biases, outBias
+    print("Lowest error", bestError, "Achieved with: \n" "Best weights: ", bestWeights, "\n Best output weights: ", bestOutWeights, "\n Best biases: ", bestBiases, "\n Best output bias: ", bestOutBias)
+            
+    
