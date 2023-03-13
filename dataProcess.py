@@ -10,10 +10,7 @@ def getData():
         #     lineList[y] = float(lineList[y])
         dataSet.append(lineList)
     return dataSet
-    
-# dataSet = getData()
-# print(dataSet)
-# print ("\n")
+
 def convertFloat(dataSet):
     errorLocation = [] # record indexes of missing data
     errorCount = 0 # count number of missing data
@@ -36,9 +33,6 @@ def convertFloat(dataSet):
     #return cleansed data
     return dataSet
 
-
-# dataSet = convertFloat(dataSet)#cleanse data
-
 def standardiseData(dataSet):
     minList = [] # initialise empty list
     maxList = [] # initialise empty list
@@ -58,15 +52,6 @@ def standardiseData(dataSet):
         for j in range(0, len(dataSet[0])):
             dataSet[i][j] = 0.8*((dataSet[i][j] - minList[j]) / (maxList[j] - minList[j])) + 0.1
     return dataSet, minList[len(minList)-1], maxList[len(maxList)-1]
-
-# dataSet, minOut, maxOut = standardiseData(dataSet)
-#minOut and maxOut are used to destandardise the output of the neural network
-# print(dataSet)
-    
-
-# trainingSet = [[]] # initialise empty list
-# validationSet = [[]] # initialise empty list
-# testSet = [[]] # initialise empty list
 
 def splitData(dataSet):
     trainingSet = [[]] # initialise empty list
@@ -90,6 +75,7 @@ def getAllData():
     data, minOut, maxOut = standardiseData(data)
     trainingSet, validationSet, testSet = splitData(data)
     return trainingSet, validationSet, testSet, minOut, maxOut
-    
-# trainingSet, validationSet, testSet , minOut, maxOut = getAllData()
-# print (len(trainingSet), len(validationSet), len(testSet))
+
+if __name__ == "__main__":
+    trainingSet, validationSet, testSet , minOut, maxOut = getAllData()
+    print (len(trainingSet), len(validationSet), len(testSet))
