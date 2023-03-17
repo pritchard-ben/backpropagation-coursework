@@ -1,7 +1,9 @@
-# import numpy as np
 import random
 import math
 import dataProcess
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+import numpy as np
 
 # The sigmoid function f(x) = 1/(1+e^-x)
 def sigmoid(x):
@@ -121,8 +123,11 @@ def useModel(weights, outWeights, biases, outBias, useData, minOut, maxOut):
 if __name__ == "__main__":
     bestError = 1
     for x in range(50):
+        #Get data from text file
         trainingData, validationData, testData, minOut, maxOut = dataProcess.getAllData()
-        weights, outWeights, biases, outBias = initWB(5, 10, 1) # first parameter is number of inputs, second is number of hidden neurons, third is number of outputs
+        
+        # first parameter is number of inputs, second is number of hidden neurons, third is number of outputs
+        weights, outWeights, biases, outBias = initWB(5, 10, 1)
         for x in range(300): # set the number of epochs to train for
             weights, outWeights, biases, outBias = trainModel(trainingData, weights, outWeights, biases, outBias, 0.1)
             # weights, outWeights, biases, outBias = trainModel(validationData, weights, outWeights, biases, outBias, 0.1)
