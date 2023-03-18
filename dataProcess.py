@@ -5,13 +5,9 @@ import numpy as nps
 def getData(): 
     file = open("dataset.txt", "r")
     dataSet = [] # initialise empty list
-    # print(file.readline())
     for x in file: # for each line in the file
         x = x[0:len(x)-1]
         lineList = x.split("\t")
-        #The following lines will convert the strings to floats, however while data not clean this is impossible
-        # for y in range(0, len(lineList)-1):
-        #     lineList[y] = float(lineList[y])
         dataSet.append(lineList)
     return dataSet
 
@@ -26,7 +22,6 @@ def convertFloat(dataSet):
             except ValueError: # if not possible, record index and update count
                 errorCount += 1
                 dataSet[i][j] = dataSet[i-4][j]
-                # print(i, j, dataSet[i])
                 errorLocation.append(i)
     # display number of missing data
     # print("Error count: " + str(errorCount))
@@ -35,26 +30,6 @@ def convertFloat(dataSet):
     # remove rows with missing data
     for i in errorLocation:
         dataSet.pop(i)
-    # plt.figure(figsize=(8,5), layout="constrained")
-    # date, t, w, sr, dsp, drh, panE = [], [], [], [], [], [], []
-    # for x in range(len(dataSet)):
-    #     date.append(dataSet[x][0] / 100)
-    #     t.append(dataSet[x][1])
-    #     w.append(dataSet[x][2])
-    #     sr.append(dataSet[x][3])
-    #     dsp.append(dataSet[x][4])
-    #     drh.append(dataSet[x][5])
-    #     panE.append(dataSet[x][6])
-    # plt.plot(date, t, label="Temperature")
-    # plt.plot(date, w, label="Wind")
-    # plt.plot(date, sr, label="Solar Radiation")
-    # plt.plot(date, dsp, label="Dew Point")
-    # plt.plot(date, drh, label="Relative Humidity")
-    # plt.plot(date, panE, label="Pan Evaporation")
-    # plt.xlabel("Date")
-    # plt.ylabel("Values")
-    # plt.legend()
-    # plt.show()
     #return cleansed data
     return dataSet
 
