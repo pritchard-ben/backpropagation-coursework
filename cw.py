@@ -2,6 +2,9 @@
 import random
 import math
 import dataProcess
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+import numpy as nps
 # The sigmoid function f(x) = 1/(1+e^-x)
 def sigmoid(x):
     return 1/(1+math.exp(-x))
