@@ -127,9 +127,9 @@ def useModel(weights, outWeights, biases, outBias, useData, minOut, maxOut):
 if __name__ == "__main__":
     bestError = 1
     trainingData, testData, minOut, maxOut = dataProcess.getAllData()
-    epochs = 10000
+    epochs = 2000
     weights, outWeights, biases, outBias = initWB(5, 10, 1) # first parameter is number of inputs, second is number of hidden neurons, third is number of outputs
-    plt.figure(figsize=(8,5), layout="constrained")
+    plt.figure(figsize=(8,3), layout="constrained")
     zList = []
     errorList = []
     for x in range(1):
