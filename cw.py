@@ -33,22 +33,22 @@ def initWB(inputs, hidden, output):
     outBias = random.uniform(0,1) # add bias to output layer
     
     return weights, outWeights, biases, outBias
-def trainModel(useData, weights, outWeights, biases, outBias, learningRate):
-    #retrieving data as well as min and max output values to be used in destandardisation
-    # Set the learning rate
-    # learningRate = 0.1
-    # weights, outWeights, biases, outBias = initWB(5, 8, 1)
-    # print ("w", weights,"\n o", outWeights, "\n B", biases, "\n b", outBias)
+def trainModel(useData, weights, outWeights, biases, outBias, initialLearningRate, epochs, maxEpochs):
+    
+    # Initialising data structures to be used
     weightedSums = []
     activations = []
     for x in range(len(weights)):
         weightedSums.append(0)
         activations.append(0)
-    # Forward propagation
-    # Iterate through the training data
-    # for x in range(len(useData)):# for each training example
+        
+    # Implementing simulated annealing, adjusts learning rate every epoch
+    learningRate = 0.01 + (initialLearningRate - 0.01) * (1-(1/(1+math.exp(10-((20*epochs+1)/maxEpochs)))))
+    print("Learning rate: " + str(learningRate))
     
-    pastWeightChange = [] # initialise list to store past weight changes to add momentum
+    # Adding momentum to the algorithm
+    # Initialising data structures to be used
+    pastWeightChange = [] 
     pastOutWeightChange = []
     for x in range(len(weights)):
         pastOutWeightChange.append(0)
@@ -56,6 +56,8 @@ def trainModel(useData, weights, outWeights, biases, outBias, learningRate):
         for i in range(len(weights)):
             pastWeightChange[x].append(0)
     
+    # Forward propagation
+    # Iterate through the training data
     for x in range(len(useData)):
         outSum = 0 # initialise weighted sum for output layer as 0
         for y in range(len(weights)):# for each neuron in the hidden layer
@@ -68,11 +70,11 @@ def trainModel(useData, weights, outWeights, biases, outBias, learningRate):
             outSum += outWeights[y] * activations[y] # calculate weighted sum, add to weighted sum
         outSum += outBias 
         outActivation = sigmoid(outSum) # calculate activation for output layer 
-        # print(outActivation, useData[0][4])
         
     # Backpropagation
     # Calculate the delta values for the output layer
         hiddenDelta = []
+        
         
         deltaOut = (useData[x][len(useData[x])-2] - outActivation) * sigmoidDerivative(outActivation) # calculate delta for output layer
     # Calculate the delta values for the hidden layer
@@ -90,67 +92,93 @@ def trainModel(useData, weights, outWeights, biases, outBias, learningRate):
                 weights[y][z] = (weights[y][z] + weightChange[z] + 0.9 * pastWeightChange[y][z]) # update the weights from input layer to hidden layer, pastWeightChange is added to add momentum
             pastWeightChange[y] = weightChange# update pastWeightChange to be used in next iteration
         outBias = outBias + learningRate * deltaOut # update the bias for the output layer
+
     return weights, outWeights, biases, outBias
 
 def useModel(weights, outWeights, biases, outBias, useData, minOut, maxOut):  
+    
+    # Initialising data structures to be used
     activations = []
     weightedSums = []
-    
     for x in range(len(weights)):
         weightedSums.append(0)
         activations.append(0)
     
     errorSum = 0
+    
+    # Loop through the data
+    for x in range(len(useData)):
         
-    for x in range(len(useData)):# test with one training example
-        for y in range(len(weights)):# for each neuron in the hidden layer
-            weightedSum = 0 # initialise weighted sum as 0
+        # For each neuron in the hidden layer
+        for y in range(len(weights)):
+            # Initialise weighted sum as 0
+            weightedSum = 0 
             
-            for z in range(len(useData[x])-2): # for each input
+            # Loop through each input
+            for z in range(len(useData[x])-2): 
                 weightedSum += weights[y][z] * useData[x][z] # calculate weighted sum, add to weighted sum
             weightedSum += biases[y] # add bias to weighted sum
             weightedSums[y] = weightedSum # store weighted sum in list
             activations[y] = sigmoid(weightedSum) # calculate activation, store in list
-        outSum = 0 # initialise weighted sum for output layer as 0
+            
+        # Initialise weighted sum for output layer as 0
+        outSum = 0 
 
         for y in range(len(outWeights)): # for each weight from hidden layer to output layer
             outSum += outWeights[y] * activations[y] # calculate weighted sum, add to weighted sum
         outSum += outBias
         outActivation = sigmoid(outSum) # calculate activation for output layer
+        
+        # Calculate how far off the prediction was, add to the sum of the errors
         errorSum += abs(outActivation - useData[x][len(useData[x])-2])
-        # print(errorSum)
 
     averageError = errorSum / len(useData)
-    # print("Average error with current weights: ",averageError)
     return averageError
 
 if __name__ == "__main__":
     bestError = 1
+    # Get data from expernal file
     trainingData, testData, minOut, maxOut = dataProcess.getAllData()
-    epochs = 2000
+
+    # Initialise weights and biases
     weights, outWeights, biases, outBias = initWB(5, 10, 1) # first parameter is number of inputs, second is number of hidden neurons, third is number of outputs
+    
+    # Initialise number of epochs and learning rate values
+    epochs = 2000
+    initialLearningRate = 0.2
+    
+    # Used to plot graphs
     plt.figure(figsize=(8,3), layout="constrained")
     zList = []
     errorList = []
+    
+    #Train with 5 different sets of weights and biases
     for x in range(1):
         bestError = 1
-        # for y in range(5):
-            # weights, outWeights, biases, outBias = initWB(5, 10, 1) # first parameter is number of inputs, second is number of hidden neurons, third is number of outputs
-        for z in range(epochs): # set the number of epochs to train for
-            weights, outWeights, biases, outBias = trainModel(trainingData, weights, outWeights, biases, outBias, 0.1)
-            # weights, outWeights, biases, outBias = trainModel(validationData, weights, outWeights, biases, outBias, 0.1)
+        
+         # For each epoch, train the model
+        for z in range(epochs): 
+            weights, outWeights, biases, outBias = trainModel(trainingData, weights, outWeights, biases, outBias, initialLearningRate, z, epochs)
+            
+            # Collecting data to plot graphs
             if z % 10 == 0:
                 averageError = useModel(weights, outWeights, biases, outBias, trainingData, minOut, maxOut)
                 errorList.append(averageError)
                 zList.append(z)
-        # averageError = useModel(weights, outWeights, biases, outBias, testData, minOut, maxOut)
-        # if averageError < bestError:
-        #     bestError, bestWeights, bestOutWeights, bestBiases, bestOutBias = averageError, weights, outWeights, biases, outBias
-        # print(x, y)
-        plt.plot (zList, errorList)
-        plt.xlabel("Epochs")
-        plt.ylabel("Average Error")
-        plt.show()
-        # print("Lowest error with", epochs, "epochs is", bestError)#, "Achieved with: " "Best weights: ", bestWeights, " Best output weights: ", bestOutWeights, " Best biases: ", bestBiases, " Best output bias: ", bestOutBias )
-        # epochs = epochs * 10
         
+        # Evaluate this set of weights and biases
+        averageError = useModel(weights, outWeights, biases, outBias, testData, minOut, maxOut)
+        
+        # If this set of weights and biases is the best found so far, store them
+        if averageError < bestError:
+            bestError, bestWeights, bestOutWeights, bestBiases, bestOutBias = averageError, weights, outWeights, biases, outBias
+
+    # Output the best values found in this cycle
+    print("Lowest error with", epochs, "epochs is", bestError, "Achieved with: " "Best weights: ", bestWeights, " Best output weights: ", bestOutWeights, " Best biases: ", bestBiases, " Best output bias: ", bestOutBias )
+    
+    # Used to plot graphs
+    plt.plot (zList, errorList)
+    plt.xlabel("Epochs")
+    plt.ylabel("Average Error")
+    plt.show()
+                
